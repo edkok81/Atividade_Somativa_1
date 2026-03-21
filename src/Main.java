@@ -91,6 +91,66 @@ class Biblioteca {
             }
         }
     }
+    // PESQUISEI SOBRE O MÉTODO DE Distância de Levenshtein E APLIQUEI AQUI
+    // Calcula quantas diferenças (inserir, deletar, trocar letra) separam duas strings.
+    private int calcularDistanciaLevenshtein(String s1, String s2) {
+        s1 = s1.toLowerCase().trim(); // Normaliza tudo para minúsculo e remove espaços extras
+        s2 = s2.toLowerCase().trim();
+
+        int[] costs = new int[s2.length() + 1];
+        for (int i = 0; i <= s1.length(); i++) {
+            int lastValue = i;
+            for (int j = 0; j <= s2.length(); j++) {
+                if (i == 0) costs[j] = j;
+                else {
+                    if (j > 0) {
+                        int newValue = costs[j - 1];
+                        if (s1.charAt(i - 1) != s2.charAt(j - 1))
+                            newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+                        costs[j - 1] = lastValue;
+                        lastValue = newValue;
+                    }
+                }
+            }
+            if (i > 0) costs[s2.length()] = lastValue;
+        }
+        return costs[s2.length()];
+    }
+
+    // NOVA FUNÇÃO: Busca Inteligente (chamada de Fuzzy Search)
+    // Percorre o acervo e encontra o livro com a menor "diferença" do que foi digitado.
+    public Livro buscarLivroAproximado(String nomeDigitado) {
+        Livro melhorMatch = null;
+        int menorDistancia = Integer.MAX_VALUE;
+
+        // Limite de erro aceitável (ex: até 3 letras erradas para títulos longos)
+        int limiteErro = 3;
+
+        for (Livro livro : acervoLivros) {
+            int distancia = calcularDistanciaLevenshtein(nomeDigitado, livro.titulo);
+
+            // Se achou uma distância menor e está dentro do limite de erro
+            if (distancia < menorDistancia && distancia <= limiteErro) {
+                menorDistancia = distancia;
+                melhorMatch = livro;
+            }
+
+            // Se a distância for 0, é uma busca exata (mas case-insensitive)
+            if (distancia == 0) return livro;
+        }
+        return melhorMatch; // Retorna o livro mais parecido ou null se estiver muito diferente
+    }
+
+    // MÉTODO PARA REGISTRAR QUALQUER BUSCA OU INTERAÇÃO COM UM LIVRO NO HISTÓRICO
+    void registrarNoHistorico(String titulo) {
+        // Só adiciona se o título não for nulo ou vazio
+        if (titulo != null && !titulo.isEmpty()) {
+            // Se o último item da pilha for igual ao anterior, ELE NÃO É ADICIONADO DE NOVO (evita duplicados seguidos)
+            if (pilhaHistorico.isEmpty() || !pilhaHistorico.peek().equals(titulo)) {
+                pilhaHistorico.push(titulo);
+            }
+        }
+    }
 }
 
 // classe Empréstimo
@@ -166,7 +226,7 @@ public class Main {
         minhaBiblioteca.conectarLivros("O Estrangeiro", "O Ladrão Honesto", 7);
         minhaBiblioteca.conectarLivros("O Estrangeiro", "1984", 6);
         minhaBiblioteca.conectarLivros("O Estrangeiro", "O Velho e o Mar", 5);
-        minhaBiblioteca.conectarLivros("O Ladrão Honesto", "A Metamorfose", 5);
+        minhaBiblioteca.conectarLivros("O Ladrão Honesto", "O Estrangeiro", 6);
         minhaBiblioteca.conectarLivros("O Ladrão Honesto", "Flores para Algernon", 4);
         minhaBiblioteca.conectarLivros("O Ladrão Honesto", "1984", 6);
         minhaBiblioteca.conectarLivros("O Velho e o Mar", "Cem Anos de Solidão", 7);
@@ -214,7 +274,7 @@ public class Main {
                                 Livro livroEscolhido = minhaBiblioteca.acervoLivros.get(indexEscolhido);
 
                                 // registrar a visualização do livro escolhido na pilha (histórico)
-                                minhaBiblioteca.pilhaHistorico.push(livroEscolhido.titulo);
+                                minhaBiblioteca.registrarNoHistorico(livroEscolhido.titulo);
 
                                 // verificar se o livro está disponível
                                 if (livroEscolhido.disponivel) {
@@ -222,14 +282,14 @@ public class Main {
 
                                     //INDICAR OUTROS LIVROS DE ACORDO COM ESSA ESCOLHA
                                     if (!livroEscolhido.recomendacoes.isEmpty()) {
-                                        System.out.println("\n*** Dica: Quem leu este livro também gostou de: ");
+                                        System.out.println("DICA: Quem leu este livro também gostou de: \n");
                                         for (Aresta a : livroEscolhido.recomendacoes) {
-                                            System.out.println("- " + a.destino.titulo + " (Afinidade: " a.peso + "/10");
+                                            System.out.println("-> " + a.destino.titulo + " (Afinidade: " + a.peso + "/10)");
                                         }
                                         System.out.println("");
                                     }
 
-                                    System.out.println("Confirma o empréstimo de " + livroEscolhido + ": ? (S/N): ");
+                                    System.out.println("Confirma o empréstimo de " + livroEscolhido.titulo + "? (S/N): ");
                                     String confirmacao = leituraDadosUsuario.nextLine();
 
                                     if (confirmacao.equalsIgnoreCase("S")) {
@@ -237,7 +297,6 @@ public class Main {
                                         System.out.println("\n=== Empréstimo realizado com sucesso! ===\n");
                                     }
                                 }
-
                                 else {
                                     // se já não estiver disponível, entra na fila
                                     System.out.println("\n*** Atenção: o livro " + livroEscolhido.titulo + " já está emprestado! ***\n");
@@ -254,13 +313,11 @@ public class Main {
                                     }
                                 }
                             }
-
                             else {
                                 System.out.println("Número inválido!");
                             }
                         }
                     }
-
                     break;
 
                 case 2:
@@ -284,6 +341,45 @@ public class Main {
                         for (Emprestimo e : minhaBiblioteca.filaEmprestimo) {
                             System.out.println(e);
                         }
+                    }
+                    break;
+
+                // IMPLEMENTAÇÃO DO CASE 4: Verificar Recomendações com Busca Inteligente usando Método de Distância Levenshtein
+                case 4:
+                    System.out.println("\n=== VERIFICAR RECOMENDAÇÕES DE LIVROS ===");
+                    System.out.print("\nDigite o título do livro (não precisa ser exato): ");
+                    String buscaTitulo = leituraDadosUsuario.nextLine();
+
+                    if (buscaTitulo.trim().isEmpty()) {
+                        System.out.println("Por favor, digite algo para buscar.");
+                        break;
+                    }
+
+                    // Usamos o novo método de busca inteligente da Biblioteca
+                    Livro livroEncontrado = minhaBiblioteca.buscarLivroAproximado(buscaTitulo);
+
+                    if (livroEncontrado != null) {
+                        // REGISTRA O LIVRO NO HISTÓRICO
+                        minhaBiblioteca.registrarNoHistorico(livroEncontrado.titulo);
+
+                        // Se a distância for > 0, o sistema avisa qual livro foi achado
+                        System.out.println("\n------------------------------------------------");
+                        System.out.println("Livro encontrado: " + livroEncontrado.titulo);
+                        System.out.println("------------------------------------------------");
+
+                        // Lógica de Recomendação do Grafo (a mesma do CASE 1)
+                        if (!livroEncontrado.recomendacoes.isEmpty()) {
+                            System.out.println("DICA: Quem leu " + livroEncontrado.titulo + " também gostou de: \n");
+                            for (Aresta a : livroEncontrado.recomendacoes) {
+                                System.out.println(" -> " + a.destino.titulo + " (Afinidade: " + a.peso + "/10)");
+                            }
+                        } else {
+                            System.out.println("Ainda não temos recomendações cadastradas para este livro.");
+                        }
+                        System.out.println("------------------------------------------------\n");
+
+                    } else {
+                        System.out.println("\nLivro não encontrado no acervo. Tente verificar a ortografia!");
                     }
                     break;
 
