@@ -45,7 +45,7 @@ class Biblioteca {
     LinkedList<Livro> acervoLivros;
 
     //HashMap de títulos
-    HashMap<Livro, Set<Livro>> mapaDeLivros;
+    HashMap<String, Livro> mapaDeLivros;
 
     // instanciar a fila de espera pelos livros
     Queue<Emprestimo> filaEmprestimo = new LinkedList<>();
@@ -56,7 +56,7 @@ class Biblioteca {
     // construtor
     Biblioteca() {
         this.acervoLivros = new LinkedList<>();
-
+        this.mapaDeLivros = new HashMap<>(); //INICIA O HASHMAP
     }
 
     // Método para cadastrar um novo livro na lista - IREI DESENVOLVER MELHOR NA SEQUÊNCIA.
@@ -65,6 +65,19 @@ class Biblioteca {
     void cadastrarLivro(Livro livro) {
         acervoLivros.add(livro);
         //System.out.println("** Novo Livro cadastrado com sucesso! **\n\n");
+        mapaDeLivros.put(livro.titulo, livro); //ADICIONA O NOVO LIVRO NA LISTA HASH PRA BUSCA FUTURA
+    }
+
+    // MÉTODO PARA CONECTAR LIVROS USANDO O HASHMAP
+    void conectarLivros(String tituloA, String tituloB, int peso) {
+        Livro livroA = mapaDeLivros.get(tituloA);
+        Livro livroB = mapaDeLivros.get(tituloB);
+
+        if (livroA != null && livroB != null) {
+            //ADICIONAR O MESMO PESO DE RECOMENDAÇÃO UNILATERALMENTE
+            livroA.adicionarRecomendacao(livroB, peso);
+            livroB.adicionarRecomendacao(livroA, peso);
+        }
     }
 
     // mostrar no console a lista de livros cadastrados ou mensagem, se estiver vazia
