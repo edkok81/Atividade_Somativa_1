@@ -109,7 +109,6 @@ class Emprestimo {
     public String toString() {
         return "Usuário: " + nome + " | Aguardando: " + livro;
     }
-
 }
 
 // início da execução
@@ -125,11 +124,57 @@ public class Main {
         Livro livro1 = new Livro("Assim Falou Zaratustra", "Friedrich Nietzsche", 1893);
         Livro livro2 = new Livro("Cem Anos de Solidão", "Gabriel Garcis Marquez", 1967);
         Livro livro3 = new Livro("1984", "George Orwell", 1949);
+        Livro livro4 = new Livro("A Sombra do Vento", "Carlos Ruiz Zafón", 2001);
+        Livro livro5 = new Livro("Flores para Algernon", "Daniel Keyes", 1959);
+        Livro livro6 = new Livro("A Metamorfose", "Franz Kafka", 1915);
+        Livro livro7 = new Livro("O Estrangeiro", "Albert Camus", 1942);
+        Livro livro8 = new Livro("O Ladrão Honesto", "Fiodor Dostoiévski", 1860);
+        Livro livro9 = new Livro("O Velho e o Mar", "Ernest Hemingway", 1952);
+        Livro livro10 = new Livro("Antes que o Café Esfrie", "Toshikazu Kawaguchi", 2015);
 
         // realizar o armazenamento dos livros no objeto livro instanciado
         minhaBiblioteca.cadastrarLivro(livro1);
         minhaBiblioteca.cadastrarLivro(livro2);
         minhaBiblioteca.cadastrarLivro(livro3);
+        minhaBiblioteca.cadastrarLivro(livro4);
+        minhaBiblioteca.cadastrarLivro(livro5);
+        minhaBiblioteca.cadastrarLivro(livro6);
+        minhaBiblioteca.cadastrarLivro(livro7);
+        minhaBiblioteca.cadastrarLivro(livro8);
+        minhaBiblioteca.cadastrarLivro(livro9);
+        minhaBiblioteca.cadastrarLivro(livro10);
+
+        //LÓGICA PARA ADICIONAR A ARESTA DE RECOMENDAÇÃO ENTRE LIVROS, COM O PESO
+        minhaBiblioteca.conectarLivros("Assim Falou Zaratustra", "1984", 4);
+        minhaBiblioteca.conectarLivros("Assim Falou Zaratustra", "O Estrangeiro", 8);
+        minhaBiblioteca.conectarLivros("Assim Falou Zaratustra", "Antes que o Café Esfrie", 7);
+        minhaBiblioteca.conectarLivros("Cem Anos de Solidão", "A Sombra do Vento", 10);
+        minhaBiblioteca.conectarLivros("Cem Anos de Solidão", "Antes que o Café Esfrie", 8);
+        minhaBiblioteca.conectarLivros("Cem Anos de Solidão", "Flores para Algernon", 8);
+        minhaBiblioteca.conectarLivros("1984", "A Sombra do Vento", 6);
+        minhaBiblioteca.conectarLivros("1984", "Cem Anos de Solidão", 6);
+        minhaBiblioteca.conectarLivros("1984", "Antes que o Café Esfrie", 7);
+        minhaBiblioteca.conectarLivros("A Sombra do Vento", "Antes que o Café Esfrie", 8);
+        minhaBiblioteca.conectarLivros("A Sombra do Vento", "Flores para Algernon", 8);
+        minhaBiblioteca.conectarLivros("A Sombra do Vento", "O Velho e o Mar", 9);
+        minhaBiblioteca.conectarLivros("Flores para Algernon", "O Velho e o Mar", 8);
+        minhaBiblioteca.conectarLivros("Flores para Algernon", "Antes que o Café Esfrie", 8);
+        minhaBiblioteca.conectarLivros("Flores para Algernon", "1984", 8);
+        minhaBiblioteca.conectarLivros("A Metamorfose", "O Ladrão Honesto", 5);
+        minhaBiblioteca.conectarLivros("A Metamorfose", "Flores para Algernon", 7);
+        minhaBiblioteca.conectarLivros("A Metamorfose", "Cem anos de Solidão", 6);
+        minhaBiblioteca.conectarLivros("O Estrangeiro", "O Ladrão Honesto", 7);
+        minhaBiblioteca.conectarLivros("O Estrangeiro", "1984", 6);
+        minhaBiblioteca.conectarLivros("O Estrangeiro", "O Velho e o Mar", 5);
+        minhaBiblioteca.conectarLivros("O Ladrão Honesto", "A Metamorfose", 5);
+        minhaBiblioteca.conectarLivros("O Ladrão Honesto", "Flores para Algernon", 4);
+        minhaBiblioteca.conectarLivros("O Ladrão Honesto", "1984", 6);
+        minhaBiblioteca.conectarLivros("O Velho e o Mar", "Cem Anos de Solidão", 7);
+        minhaBiblioteca.conectarLivros("O Velho e o Mar", "A Sombra do Vento", 7);
+        minhaBiblioteca.conectarLivros("O Velho e o Mar", "Assim Falou Zaratustra", 5);
+        minhaBiblioteca.conectarLivros("Antes que o Café Esfrie", "O Velho e o Mar", 6);
+        minhaBiblioteca.conectarLivros("Antes que o Café Esfrie", "A Metamorfose", 4);
+        minhaBiblioteca.conectarLivros("Antes que o Café Esfrie", "O Estrangeiro", 5);
 
         int opcao = -1;
 
