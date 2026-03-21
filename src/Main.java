@@ -1,5 +1,16 @@
 import java.util.*;
 
+// classe aresta
+class Aresta {
+    Livro destino;
+    int peso; // AFINIDADE ENTRE OS LIVROS, MEDIDOS DE 1 A 10 (1 = menos indicado e 10 = muito indicado)
+
+    public Aresta (Livro destino, int peso) {
+        this.destino = destino;
+        this.peso = peso;
+    }
+}
+
 // classe Livro
 class Livro {
     String titulo;
@@ -7,11 +18,18 @@ class Livro {
     int anoPublicacao;
     boolean disponivel = true;
 
+    //LISTA DE CONEXÕES ENTRE OS LIVROS
+    List<Aresta> recomendacoes = new ArrayList<>();
+
     // construtor
     public Livro(String titulo, String autor, int anoPublicacao) {
         this.titulo = titulo;
         this.autor = autor;
         this.anoPublicacao = anoPublicacao;
+    }
+
+    public void adicionarRecomendacao(Livro destino, int peso) {
+        this.recomendacoes.add(new Aresta(destino, peso));
     }
 
     // lógica pro Java imprimir o valor da variável, e não da memória onde está alocada
@@ -26,6 +44,9 @@ class Biblioteca {
     // lista de acervo de livros
     LinkedList<Livro> acervoLivros;
 
+    //HashMap de títulos
+    HashMap<Livro, Set<Livro>> mapaDeLivros;
+
     // instanciar a fila de espera pelos livros
     Queue<Emprestimo> filaEmprestimo = new LinkedList<>();
 
@@ -35,6 +56,7 @@ class Biblioteca {
     // construtor
     Biblioteca() {
         this.acervoLivros = new LinkedList<>();
+
     }
 
     // Método para cadastrar um novo livro na lista - IREI DESENVOLVER MELHOR NA SEQUÊNCIA.
