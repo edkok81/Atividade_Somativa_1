@@ -183,6 +183,7 @@ public class Main {
             System.out.println("1. Ver Acervo Completo / Reservar");
             System.out.println("2. Ver Histórico de Navegação");
             System.out.println("3. Ver Lista de Espera/Reservas");
+            System.out.println("4. Verificar Recomendações de livros");
             System.out.println("0. Sair");
             System.out.println("\nEscolha uma das opções (número referente à opção) e pressione ENTER");
 
@@ -218,7 +219,17 @@ public class Main {
                                 // verificar se o livro está disponível
                                 if (livroEscolhido.disponivel) {
                                     System.out.println("\nO livro '" + livroEscolhido.titulo + "' está disponível!\n");
-                                    System.out.println("Confirma o empréstimo? (S/N): ");
+
+                                    //INDICAR OUTROS LIVROS DE ACORDO COM ESSA ESCOLHA
+                                    if (!livroEscolhido.recomendacoes.isEmpty()) {
+                                        System.out.println("\n*** Dica: Quem leu este livro também gostou de: ");
+                                        for (Aresta a : livroEscolhido.recomendacoes) {
+                                            System.out.println("- " + a.destino.titulo + " (Afinidade: " a.peso + "/10");
+                                        }
+                                        System.out.println("");
+                                    }
+
+                                    System.out.println("Confirma o empréstimo de " + livroEscolhido + ": ? (S/N): ");
                                     String confirmacao = leituraDadosUsuario.nextLine();
 
                                     if (confirmacao.equalsIgnoreCase("S")) {
@@ -251,7 +262,6 @@ public class Main {
                     }
 
                     break;
-
 
                 case 2:
                     System.out.println("\n--- HISTÓRICO DE VISUALIZAÇÃO DE LIVROS (Mais recente no topo) ---\n");
