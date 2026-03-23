@@ -59,9 +59,8 @@ class Biblioteca {
         this.mapaDeLivros = new HashMap<>(); //INICIA O HASHMAP
     }
 
-    // Método para cadastrar um novo livro na lista - IREI DESENVOLVER MELHOR NA SEQUÊNCIA.
+    // Método para cadastrar um novo livro na lista - IREI DESENVOLVER MELHOR NA SEQUÊNCIA, SE FOR O CASO.
     // Por ex., o sistema deverá pedir os dados pro usuário digitar.
-    // Bem como, criarei um Menu Interativo para navegar pelo sistema.
     void cadastrarLivro(Livro livro) {
         acervoLivros.add(livro);
         //System.out.println("** Novo Livro cadastrado com sucesso! **\n\n");
@@ -282,14 +281,16 @@ public class Main {
 
                                     //INDICAR OUTROS LIVROS DE ACORDO COM ESSA ESCOLHA
                                     if (!livroEscolhido.recomendacoes.isEmpty()) {
-                                        System.out.println("DICA: Quem leu este livro também gostou de: \n");
+                                        System.out.println("DICA: Quem leu '" + livroEscolhido.titulo + "' também gostou de: \n");
                                         for (Aresta a : livroEscolhido.recomendacoes) {
-                                            System.out.println("-> " + a.destino.titulo + " (Afinidade: " + a.peso + "/10)");
+                                            if (a.peso >= 7) {
+                                                System.out.println("-> " + a.destino.titulo + " (Afinidade: " + a.peso + "/10)");
+                                            }
                                         }
                                         System.out.println("");
                                     }
 
-                                    System.out.println("Confirma o empréstimo de " + livroEscolhido.titulo + "? (S/N): ");
+                                    System.out.println("Confirma o empréstimo de '" + livroEscolhido.titulo + "'? (S/N): ");
                                     String confirmacao = leituraDadosUsuario.nextLine();
 
                                     if (confirmacao.equalsIgnoreCase("S")) {
@@ -354,7 +355,6 @@ public class Main {
                         System.out.println("Por favor, digite algo para buscar.");
                         break;
                     }
-
                     // Usamos o novo método de busca inteligente da Biblioteca
                     Livro livroEncontrado = minhaBiblioteca.buscarLivroAproximado(buscaTitulo);
 
@@ -369,9 +369,11 @@ public class Main {
 
                         // Lógica de Recomendação do Grafo (a mesma do CASE 1)
                         if (!livroEncontrado.recomendacoes.isEmpty()) {
-                            System.out.println("DICA: Quem leu " + livroEncontrado.titulo + " também gostou de: \n");
+                            System.out.println("DICA: Quem leu '" + livroEncontrado.titulo + "' também gostou de: \n");
                             for (Aresta a : livroEncontrado.recomendacoes) {
-                                System.out.println(" -> " + a.destino.titulo + " (Afinidade: " + a.peso + "/10)");
+                                if (a.peso >= 7) {
+                                    System.out.println(" -> " + a.destino.titulo + " (Afinidade: " + a.peso + "/10)");
+                                }
                             }
                         } else {
                             System.out.println("Ainda não temos recomendações cadastradas para este livro.");
