@@ -116,7 +116,6 @@ class Biblioteca {
         return buscarRecursivo(atual.direita, titulo);
     }
 
-
     // MÉTODO PARA CONECTAR LIVROS USANDO O HASHMAP
     public void conectarLivros(String tituloA, String tituloB, int peso) {
         Livro livroA = mapaDeLivros.get(tituloA);
@@ -140,7 +139,7 @@ class Biblioteca {
             }
         }
     }
-    // PESQUISEI SOBRE O MÉTODO DE Distância de Levenshtein E APLIQUEI AQUI
+    // DESCOBRI E PESQUISEI SOBRE O MÉTODO DE Distância de Levenshtein E APLIQUEI AQUI
     // Calcula quantas diferenças (inserir, deletar, trocar letra) separam duas strings.
     private int calcularDistanciaLevenshtein(String s1, String s2) {
         s1 = s1.toLowerCase().trim(); // Normaliza tudo para minúsculo e remove espaços extras
@@ -172,8 +171,8 @@ class Biblioteca {
         Livro melhorMatch = null;
         int menorDistancia = Integer.MAX_VALUE;
 
-        // Limite de erro aceitável (ex: até 3 letras erradas para títulos longos)
-        int limiteErro = 3;
+        // Limite de erro aceitável (ex: até 4 letras erradas para títulos longos)
+        int limiteErro = 4;
 
         for (Livro livro : acervoLivros) {
             int distancia = calcularDistanciaLevenshtein(nomeDigitado, livro.titulo);
@@ -305,7 +304,7 @@ public class Main {
                         System.out.println("=== Acervo Vazio ===");
                     } else {
                         minhaBiblioteca.imprimirAcervo();
-                        System.out.println("\nGostaria de reservar algum dos livros? (S/N): ");
+                        System.out.println("\nGostaria de emprestar algum dos livros? (S/N): ");
                         String respostaReserva = leituraDadosUsuario.nextLine();
 
                         if (respostaReserva.equalsIgnoreCase("S")) {
@@ -385,28 +384,39 @@ public class Main {
                     break;
 
                 case 3:
+                    //LÓGICA PARA IMPRIMIR A FILA DE RESERVA DE EMPRÉSTIMO
                     System.out.println("\n=== LISTA DE ESPERA PARA EMPRÉSTIMO ===\n");
+
+                    //SE A LISTA ESTÁ VAZIA
                     if (minhaBiblioteca.filaEmprestimo.isEmpty()) {
                         System.out.println("Não há ninguém na fila de empréstimo!");
-                    } else {
+                    } else { //SE NÃO, IMPRIME A LISTA COM OS NOMES SALVOS DE ACORDO COM A LÓGICA DO CASE 1
                         for (Emprestimo e : minhaBiblioteca.filaEmprestimo) {
                             System.out.println(e);
                         }
                     }
                     break;
 
-                // IMPLEMENTAÇÃO DO CASE 4: Verificar Recomendações com Busca Inteligente usando Método de Distância Levenshtein
+                // IMPLEMENTAÇÃO DO CASE 4: Verificar Recomendações com Busca RÁPIDA E TAMBÉM O Método de Distância Levenshtein
                 case 4:
                     System.out.println("\n=== VERIFICAR RECOMENDAÇÕES DE LIVROS ===");
-                    System.out.print("\nDigite o título do livro (não precisa ser exato): ");
-                    String buscaTitulo = leituraDadosUsuario.nextLine();
+                    System.out.print("\n*** Digite o título de um livro já cadastrado (não precisa ser exato) ***");
+                    System.out.print("\n-> Faremos recomendações de acordo com o nome do livro que você digitar: ");
+                    String buscaTitulo = leituraDadosUsuario.nextLine(); //Capturar texto digitado pelo usuário
 
                     if (buscaTitulo.trim().isEmpty()) {
-                        System.out.println("Por favor, digite algo para buscar.");
+                        System.out.println("=== Por favor, digite algo para buscar ===");
                         break;
                     }
-                    // Usamos o novo método de busca inteligente da Biblioteca
-                    Livro livroEncontrado = minhaBiblioteca.buscarLivroAproximado(buscaTitulo);
+
+                    //BUSCA RÁPIDA NA ÁRVORE
+                    Livro livroEncontrado =minhaBiblioteca.buscarNaArvore(buscaTitulo);
+
+                    // Se não achar na árvore, usamos o método de busca por aproximação (Levenshtein)
+                    if (livroEncontrado == null) {
+                        System.out.println("=== Nome exato não encontrado. Tentando a busca por semelhança... ===");
+                        livroEncontrado = minhaBiblioteca.buscarLivroAproximado(buscaTitulo);
+                    }
 
                     if (livroEncontrado != null) {
                         // REGISTRA O LIVRO NO HISTÓRICO
