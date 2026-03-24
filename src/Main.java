@@ -21,11 +21,19 @@ class Livro {
     //LISTA DE CONEXÕES ENTRE OS LIVROS
     List<Aresta> recomendacoes = new ArrayList<>();
 
+    //CRIAÇÃO DOS GALHOS ESQ E DIR PARA USARMOS NA ÁRVORE
+    //(em forma de Autorreferência à própria classe Livro! Por isso não é um atributo String por exemplo))
+    Livro esquerda, direita;
+
     // construtor
     public Livro(String titulo, String autor, int anoPublicacao) {
         this.titulo = titulo;
         this.autor = autor;
         this.anoPublicacao = anoPublicacao;
+
+        //INICIALIZAR OS GALHOS COMO NULL (NÃO É NECESSÁRIO EFETIVAMENTE, MAS ESCLARECE O PAPEL COMPLETO DO CONSTRUTOR)
+        this. esquerda = null;
+        this.direita = null;
     }
 
     public void adicionarRecomendacao(Livro destino, int peso) {
@@ -41,6 +49,9 @@ class Livro {
 
 // classe Biblioteca
 class Biblioteca {
+    //CRIAÇÃO DA RAÍZ DA ÁRVORE
+    private Livro raiz;
+
     // lista de acervo de livros
     LinkedList<Livro> acervoLivros;
 
@@ -57,18 +68,57 @@ class Biblioteca {
     Biblioteca() {
         this.acervoLivros = new LinkedList<>();
         this.mapaDeLivros = new HashMap<>(); //INICIA O HASHMAP
+
+        //AQUI, A MESMA LÓGICA PRA INICIALIZAR UM OBJETO NULO, COMO EM ESQ E DIR DA CLASSE LIVRO
+        this.raiz = null;
+    }
+
+    //MÉTODO PARA INSERIR LIVRO NA ÁRVORE BINÁRIA
+    private Livro inserirNaArvore(Livro atual, Livro novo) {
+        if (atual == null) {
+            return novo;
+        }
+
+        //COMPARA OS TÍTULOS EM ORDEM ALFABÉTICA
+        if (novo.titulo.compareToIgnoreCase(atual.titulo) < 0) {
+            atual.esquerda = inserirNaArvore(atual.esquerda, novo);
+        } else if (novo.titulo.compareToIgnoreCase(atual.titulo) > 0) {
+            atual.direita = inserirNaArvore(atual.direita, novo);
+        }
+        return atual;
     }
 
     // Método para cadastrar um novo livro na lista - IREI DESENVOLVER MELHOR NA SEQUÊNCIA, SE FOR O CASO.
     // Por ex., o sistema deverá pedir os dados pro usuário digitar.
-    void cadastrarLivro(Livro livro) {
+    public void cadastrarLivro(Livro livro) {
         acervoLivros.add(livro);
-        //System.out.println("** Novo Livro cadastrado com sucesso! **\n\n");
         mapaDeLivros.put(livro.titulo, livro); //ADICIONA O NOVO LIVRO NA LISTA HASH PRA BUSCA FUTURA
+
+        //CADASTRAR O LIVRO NA ÁRVORE
+        this.raiz = inserirNaArvore(this.raiz, livro);
     }
 
+    //MÉTODO PARA BUSCAR NA ÁRVORE
+    public Livro buscarNaArvore(String titulo) {
+        return buscarRecursivo(this.raiz, titulo);
+    }
+
+    //MÉTODO COM A LÓGICA PARA REALIZAR A BUSCA RECURSIVAMENTE
+    private Livro buscarRecursivo(Livro atual, String titulo) {
+        if (atual == null || atual.titulo.equalsIgnoreCase(titulo)) {
+            return atual;
+        }
+
+        if (titulo.compareToIgnoreCase(atual.titulo) < 0) {
+            return buscarRecursivo(atual.esquerda, titulo);
+        }
+
+        return buscarRecursivo(atual.direita, titulo);
+    }
+
+
     // MÉTODO PARA CONECTAR LIVROS USANDO O HASHMAP
-    void conectarLivros(String tituloA, String tituloB, int peso) {
+    public void conectarLivros(String tituloA, String tituloB, int peso) {
         Livro livroA = mapaDeLivros.get(tituloA);
         Livro livroB = mapaDeLivros.get(tituloB);
 
@@ -80,7 +130,7 @@ class Biblioteca {
     }
 
     // mostrar no console a lista de livros cadastrados ou mensagem, se estiver vazia
-    void imprimirAcervo() {
+    public void imprimirAcervo() {
         if (acervoLivros.isEmpty()) {
             System.out.println("== Não há livros cadastrados ==");
         } else {
