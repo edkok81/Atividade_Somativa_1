@@ -73,6 +73,11 @@ class Biblioteca {
         this.raiz = null;
     }
 
+    // MÉTODO PARA CLASSES EXTERNAS ACESSAREM O INÍCIO DA ÁRVORE
+    public Livro getRaiz() {
+        return this.raiz;
+    }
+
     //MÉTODO PARA INSERIR LIVRO NA ÁRVORE BINÁRIA
     private Livro inserirNaArvore(Livro atual, Livro novo) {
         if (atual == null) {
@@ -141,7 +146,7 @@ class Biblioteca {
     }
     // DESCOBRI E PESQUISEI SOBRE O MÉTODO DE Distância de Levenshtein E APLIQUEI AQUI
     // Calcula quantas diferenças (inserir, deletar, trocar letra) separam duas strings.
-    private int calcularDistanciaLevenshtein(String s1, String s2) {
+    public static int calcularDistanciaLevenshtein(String s1, String s2) {
         s1 = s1.toLowerCase().trim(); // Normaliza tudo para minúsculo e remove espaços extras
         s2 = s2.toLowerCase().trim();
 
@@ -215,7 +220,64 @@ class Emprestimo {
     // método para criar a lista de empréstimo
     @Override
     public String toString() {
-        return "Usuário: " + nome + " | Aguardando: " + livro;
+        return "Usuário: " + nome + " | Aguardando o livro: " + livro + ".";
+    }
+}
+
+// CLASSE PARA A BUSCA DFS (PROFUNDIDADE)
+class BuscarDFS {
+    public static Livro buscar (Livro atual, String alvo, int[] contador) {
+        if (atual == null) {
+            return null;
+        }
+
+        contador[0]++;
+        System.out.println("Nó visitado pela busca: " + atual.titulo);
+
+        if (Biblioteca.calcularDistanciaLevenshtein(alvo, atual.titulo) <= 3) {
+            return atual;
+        }
+
+        Livro encontrado = buscar(atual.esquerda, alvo, contador);
+        if (encontrado != null) {
+            return encontrado;
+        }
+
+        return buscar(atual.direita, alvo, contador);
+    }
+}
+
+// CLASSE PARA A BUSCA BFS (LARGURA)
+class BuscarBFS {
+    public static Livro buscar (Livro raiz, String alvo) {
+        if (raiz == null) {
+            return null;
+        }
+
+        int visitados = 0;
+        Queue<Livro> fila = new LinkedList<>();
+        fila.add(raiz);
+
+        System.out.println("\n=== Iniciando o rastreamento BFS (LARGURA) ===\n");
+
+        while (!fila.isEmpty()) {
+            visitados++;
+            Livro atual = fila.poll();
+            System.out.println("Nó visitado pela busca: " + atual.titulo);
+
+            if (Biblioteca.calcularDistanciaLevenshtein(alvo, atual.titulo) <= 3) {
+                System.out.println("\nTotal de nós visitados pelo BFS: " + visitados);
+                return atual;
+            }
+
+            if (atual.esquerda != null) {
+                fila.add(atual.esquerda);
+            }
+            if (atual.direita != null) {
+                fila.add(atual.direita);
+            }
+        }
+        return null;
     }
 }
 
@@ -292,6 +354,7 @@ public class Main {
             System.out.println("2. Ver Histórico de Navegação");
             System.out.println("3. Ver Lista de Espera/Reservas");
             System.out.println("4. Verificar Recomendações de livros");
+            System.out.println("5. Comparar buscas DFS vs BFS (Métricas)");
             System.out.println("0. Sair");
             System.out.println("\nEscolha uma das opções (número referente à opção) e pressione ENTER");
 
@@ -359,7 +422,7 @@ public class Main {
 
                                         // add na fila de empréstimos
                                         minhaBiblioteca.filaEmprestimo.add(new Emprestimo(nome, livroEscolhido.titulo));
-                                        System.out.println("Você foi adicionado na fila de espera do livro " + livroEscolhido.titulo);
+                                        System.out.println("Você foi adicionado na fila de espera do livro " + "'" + livroEscolhido.titulo + "'.");
                                     }
                                 }
                             }
@@ -410,7 +473,7 @@ public class Main {
                     }
 
                     //BUSCA RÁPIDA NA ÁRVORE
-                    Livro livroEncontrado =minhaBiblioteca.buscarNaArvore(buscaTitulo);
+                    Livro livroEncontrado = minhaBiblioteca.buscarNaArvore(buscaTitulo);
 
                     // Se não achar na árvore, usamos o método de busca por aproximação (Levenshtein)
                     if (livroEncontrado == null) {
@@ -442,6 +505,33 @@ public class Main {
 
                     } else {
                         System.out.println("\nLivro não encontrado no acervo. Tente verificar a ortografia!");
+                    }
+                    break;
+
+                case 5:
+                    System.out.println("\n=== Teste de busca DFS e BFS ===");
+                    System.out.println("\nDigite o nome do título que deseja buscar: ");
+                    String inputBusca = leituraDadosUsuario.nextLine();
+
+                    if (inputBusca.trim().isEmpty()) {
+                        System.out.println("\nNada foi digitado. Cancelando pedido...");
+                    }
+
+                    // chamados a função BFS e guardamos o resultado
+                    Livro resultadoBFS = BuscarBFS.buscar(minhaBiblioteca.getRaiz(), inputBusca);
+                    System.out.println("-----------------------------------");
+
+                    // chamamos a função DFS e guardamos o resultado
+                    System.out.println("\n=== Iniciando o rastreamento DFS (PROFUNDIDADE) ===\n");
+                    int[] contagemDFS = {0};
+                    Livro resultadoDFS = BuscarDFS.buscar(minhaBiblioteca.getRaiz(), inputBusca, contagemDFS);
+                    System.out.println("\nTotal de de livros visitados pela busca DFS: " + contagemDFS[0]);
+
+                    if (resultadoBFS != null) {
+                        System.out.println("\nRESULTADO DA BUSCA: Livro encontrado! --- " + resultadoBFS.titulo +" ---");
+                        minhaBiblioteca.registrarNoHistorico(resultadoBFS.titulo);
+                    } else {
+                        System.out.println("\n[AVISO] Nenhum livro semelhante à sua busca foi encontrado na árvore.");
                     }
                     break;
 
