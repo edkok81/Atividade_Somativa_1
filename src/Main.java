@@ -281,6 +281,81 @@ class BuscarBFS {
     }
 }
 
+class Djikstra {
+    // Método para mostrar os livros pela distância estrutural, ou seja, quantos saltos estão de ligação um com o outro
+    // Seria o mesmo conceito de redes sociais como LinkedIn que mostram a 'distância' de um contato e outro que ainda não estão conectados
+    // Como no meu sistema, quase todos os livros se conectam com todos, a maioria das ligações estruturais será de 1 salto
+    public static Map<Livro, Integer> calcularCaminhosVizinhanca(Biblioteca biblioteca, Livro origem) {
+        //Hashmap para guardar o livro e a distância que ele está da raiz
+        Map<Livro, Integer> distancias = new HashMap<>();
+
+        //Fila para guardar os livros que faltam ser visitados
+        Queue<Livro> fila = new LinkedList<>();
+
+        //Primeiro livro começa com distância 0
+        distancias.put(origem, 0);
+        fila.add(origem);
+
+        while (!fila.isEmpty()) {
+            Livro atual = fila.poll();
+            int distanciaAtual = distancias.get(atual);
+
+            //percorre as arestas do livro que saiu da fila
+            for (Aresta aresta : atual.recomendacoes) {
+                Livro vizinho = aresta.destino;
+
+                //Se o vizinho ainda não foi mapeado (não está no Hashmap de distâncias)
+                if (!distancias.containsKey(vizinho)) {
+                    //Regista a distância, que é distância do anterior + 1
+                    distancias.put(vizinho, distanciaAtual + 1);
+
+                    //adiciona na fila para que os vizinhos dele também sejam explorados depois
+                    fila.add(vizinho);
+                }
+            }
+        }
+        return distancias;
+    }
+
+    // Agora um método que mostra a proximidade dos livros por afinidade de tema, considerando o peso das ligações entre eles.
+    public static Map<Livro, Integer> calcularCaminhosAfinidade(Biblioteca biblioteca, Livro origem) {
+        Map<Livro, Integer> distancias = new HashMap<>();
+
+        // Para implementar essa lógica, precisei pesquisar formas de fazer isso de maneira efetiva, já que o resultado da
+        // da busca por 'saltos' me pareceu bastante 'simples'. Assim, encontrei que deveria usar PriorityQueue
+        PriorityQueue<Livro> filaPrioridade = new PriorityQueue<>(Comparator.comparingInt(distancias::get));
+
+        // Inicia as distâncias com valor bem alto, porque aqui quanto maior o número, menor a afinidade.
+        for (Livro l : biblioteca.acervoLivros) {
+            distancias.put(l, Integer.MAX_VALUE);
+        }
+
+        distancias.put(origem, 0);
+        filaPrioridade.add(origem);
+
+        while(!filaPrioridade.isEmpty()) {
+            Livro atual = filaPrioridade.poll();
+            int distanciaAtual = distancias.get(atual);
+
+            for (Aresta aresta : atual.recomendacoes) {
+                Livro vizinho = aresta.destino;
+
+                // Aqui, precisamos inverter o valor do peso, pois o Djikstra considera que quanto maior o número, menor a afinidade.
+                // Entendi que o resultado não será matematicamente o mesmo do peso original, mas como forma de praticar aqui no
+                // exercício, foi o que considerei mais prático e rápido, já que temos prazos curtos rs...
+                int custoAresta = 11 - aresta.peso;
+                int novaDistancia = distanciaAtual + custoAresta;
+
+                if (novaDistancia < distancias.get(vizinho)) {
+                    distancias.put(vizinho, novaDistancia);
+                    filaPrioridade.add(vizinho);
+                }
+            }
+        }
+        return distancias;
+    }
+}
+
 // início da execução
 public class Main {
     public static void main(String[] args) {
@@ -355,6 +430,7 @@ public class Main {
             System.out.println("3. Ver Lista de Espera/Reservas");
             System.out.println("4. Verificar Recomendações de livros");
             System.out.println("5. Comparar buscas DFS vs BFS (Métricas)");
+            System.out.println("6. Testar algorítmo Djikstra");
             System.out.println("0. Sair");
             System.out.println("\nEscolha uma das opções (número referente à opção) e pressione ENTER");
 
@@ -409,8 +485,7 @@ public class Main {
                                         livroEscolhido.disponivel = false; // deixa o livro com o status de indisponível
                                         System.out.println("\n=== Empréstimo realizado com sucesso! ===\n");
                                     }
-                                }
-                                else {
+                                } else {
                                     // se já não estiver disponível, entra na fila
                                     System.out.println("\n*** Atenção: o livro " + livroEscolhido.titulo + " já está emprestado! ***\n");
                                     System.out.println("Deseja entrar na fila de reserva de empréstimo? (S/N): ");
@@ -425,8 +500,7 @@ public class Main {
                                         System.out.println("Você foi adicionado na fila de espera do livro " + "'" + livroEscolhido.titulo + "'.");
                                     }
                                 }
-                            }
-                            else {
+                            } else {
                                 System.out.println("Número inválido!");
                             }
                         }
@@ -532,6 +606,42 @@ public class Main {
                         minhaBiblioteca.registrarNoHistorico(resultadoBFS.titulo);
                     } else {
                         System.out.println("\n[AVISO] Nenhum livro semelhante à sua busca foi encontrado na árvore.");
+                    }
+                    break;
+
+                case 6:
+                    System.out.println("\nDigite o título para calcular proximidade pelo algoritmo Djikstra: ");
+                    String tituloDjikstra = leituraDadosUsuario.nextLine();
+                    Livro origemDjikstra = minhaBiblioteca.buscarLivroAproximado(tituloDjikstra);
+
+                    if(origemDjikstra != null) {
+                        // Cálculo pela vizinhança
+                        Map<Livro, Integer> vizinhanca = Djikstra.calcularCaminhosVizinhanca(minhaBiblioteca, origemDjikstra);
+
+                        System.out.println("\n=== Nível de proximidade POR VIZINHANÇA === ");
+                        System.out.println("\nPartindo de: " + origemDjikstra.titulo);
+
+                        // registra a busca do livro no histórico
+                        minhaBiblioteca.registrarNoHistorico(origemDjikstra.titulo);
+
+                        //Ordenar o resultado pela distância. Menor primeiro.
+                        vizinhanca.entrySet().stream().filter(e -> e.getValue() > 0 && e.getValue() < Integer.MAX_VALUE).sorted(Map.Entry.comparingByValue()).forEach(e -> {
+                            System.out.println("- Livro: " + e.getKey().titulo + " | Grau de Distância: " + e.getValue() + (e.getValue() == 1 ? " salto" : " saltos"));
+                        });
+
+                        // Cálculo pela afinidade
+                        Map<Livro, Integer> afinidade = Djikstra.calcularCaminhosAfinidade(minhaBiblioteca, origemDjikstra);
+
+                        System.out.println("\n=== Nível de proximidade por AFINIDADE ===");
+                        System.out.println("\nSe você gostou de " + origemDjikstra.titulo + ", veja outros títulos");
+                        System.out.println("*** Obs.: Menor valor = recomendação mais forte");
+
+                        afinidade.entrySet().stream().filter(e -> e.getValue() > 0 && e.getValue() < Integer.MAX_VALUE)
+                                .sorted(Map.Entry.comparingByValue())
+                                .forEach(e -> System.out.println("- Livro " + e.getKey().titulo + " | Valor da Afinidade: " + e.getValue()));
+
+                    } else {
+                        System.out.println("Livro não encontrado.");
                     }
                     break;
 
