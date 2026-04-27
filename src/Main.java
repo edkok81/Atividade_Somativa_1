@@ -13,10 +13,10 @@ class Aresta {
 
 // classe Livro
 class Livro {
-    String titulo;
-    String autor;
-    int anoPublicacao;
-    boolean disponivel = true;
+    private String titulo;
+    private String autor;
+    private int anoPublicacao;
+    private boolean disponivel = true;
 
     //LISTA DE CONEXÕES ENTRE OS LIVROS
     List<Aresta> recomendacoes = new ArrayList<>();
@@ -34,6 +34,28 @@ class Livro {
         //INICIALIZAR OS GALHOS COMO NULL (NÃO É NECESSÁRIO EFETIVAMENTE, MAS ESCLARECE O PAPEL COMPLETO DO CONSTRUTOR)
         this. esquerda = null;
         this.direita = null;
+    }
+
+    //métodos getter
+    public String getTitulo() {
+        return this.titulo;
+    }
+
+    public String getAutor() {
+        return this.autor;
+    }
+
+    public int getAnoPublicacao() {
+        return this.anoPublicacao;
+    }
+
+    public boolean isDisponivel() {
+        return this.disponivel;
+    }
+
+    //método setter para trocar o status de disponibilidade
+    public void setDisponivel(boolean disponivel) {
+        this.disponivel = disponivel;
     }
 
     public void adicionarRecomendacao(Livro destino, int peso) {
@@ -85,9 +107,9 @@ class Biblioteca {
         }
 
         //COMPARA OS TÍTULOS EM ORDEM ALFABÉTICA
-        if (novo.titulo.compareToIgnoreCase(atual.titulo) < 0) {
+        if (novo.getTitulo().compareToIgnoreCase(atual.getTitulo()) < 0) {
             atual.esquerda = inserirNaArvore(atual.esquerda, novo);
-        } else if (novo.titulo.compareToIgnoreCase(atual.titulo) > 0) {
+        } else if (novo.getTitulo().compareToIgnoreCase(atual.getTitulo()) > 0) {
             atual.direita = inserirNaArvore(atual.direita, novo);
         }
         return atual;
@@ -97,7 +119,7 @@ class Biblioteca {
     // Por ex., o sistema deverá pedir os dados pro usuário digitar.
     public void cadastrarLivro(Livro livro) {
         acervoLivros.add(livro);
-        mapaDeLivros.put(livro.titulo, livro); //ADICIONA O NOVO LIVRO NA LISTA HASH PRA BUSCA FUTURA
+        mapaDeLivros.put(livro.getTitulo(), livro); //ADICIONA O NOVO LIVRO NA LISTA HASH PRA BUSCA FUTURA
 
         //CADASTRAR O LIVRO NA ÁRVORE
         this.raiz = inserirNaArvore(this.raiz, livro);
@@ -110,11 +132,11 @@ class Biblioteca {
 
     //MÉTODO COM A LÓGICA PARA REALIZAR A BUSCA RECURSIVAMENTE
     private Livro buscarRecursivo(Livro atual, String titulo) {
-        if (atual == null || atual.titulo.equalsIgnoreCase(titulo)) {
+        if (atual == null || atual.getTitulo().equalsIgnoreCase(titulo)) {
             return atual;
         }
 
-        if (titulo.compareToIgnoreCase(atual.titulo) < 0) {
+        if (titulo.compareToIgnoreCase(atual.getTitulo()) < 0) {
             return buscarRecursivo(atual.esquerda, titulo);
         }
 
@@ -180,7 +202,7 @@ class Biblioteca {
         int limiteErro = 4;
 
         for (Livro livro : acervoLivros) {
-            int distancia = calcularDistanciaLevenshtein(nomeDigitado, livro.titulo);
+            int distancia = calcularDistanciaLevenshtein(nomeDigitado, livro.getTitulo());
 
             // Se achou uma distância menor e está dentro do limite de erro
             if (distancia < menorDistancia && distancia <= limiteErro) {
@@ -232,9 +254,9 @@ class BuscarDFS {
         }
 
         contador[0]++;
-        System.out.println("Nó visitado pela busca: " + atual.titulo);
+        System.out.println("Nó visitado pela busca: " + atual.getTitulo());
 
-        if (Biblioteca.calcularDistanciaLevenshtein(alvo, atual.titulo) <= 3) {
+        if (Biblioteca.calcularDistanciaLevenshtein(alvo, atual.getTitulo()) <= 3) {
             return atual;
         }
 
@@ -263,9 +285,9 @@ class BuscarBFS {
         while (!fila.isEmpty()) {
             visitados++;
             Livro atual = fila.poll();
-            System.out.println("Nó visitado pela busca: " + atual.titulo);
+            System.out.println("Nó visitado pela busca: " + atual.getTitulo());
 
-            if (Biblioteca.calcularDistanciaLevenshtein(alvo, atual.titulo) <= 3) {
+            if (Biblioteca.calcularDistanciaLevenshtein(alvo, atual.getTitulo()) <= 3) {
                 System.out.println("\nTotal de nós visitados pelo BFS: " + visitados);
                 return atual;
             }
@@ -461,33 +483,33 @@ public class Main {
                                 Livro livroEscolhido = minhaBiblioteca.acervoLivros.get(indexEscolhido);
 
                                 // registrar a visualização do livro escolhido na pilha (histórico)
-                                minhaBiblioteca.registrarNoHistorico(livroEscolhido.titulo);
+                                minhaBiblioteca.registrarNoHistorico(livroEscolhido.getTitulo());
 
                                 // verificar se o livro está disponível
-                                if (livroEscolhido.disponivel) {
-                                    System.out.println("\nO livro '" + livroEscolhido.titulo + "' está disponível!\n");
+                                if (livroEscolhido.isDisponivel()) {
+                                    System.out.println("\nO livro '" + livroEscolhido.getTitulo() + "' está disponível!\n");
 
                                     //INDICAR OUTROS LIVROS DE ACORDO COM ESSA ESCOLHA
                                     if (!livroEscolhido.recomendacoes.isEmpty()) {
-                                        System.out.println("DICA: Quem leu '" + livroEscolhido.titulo + "' também gostou de: \n");
+                                        System.out.println("DICA: Quem leu '" + livroEscolhido.getTitulo() + "' também gostou de: \n");
                                         for (Aresta a : livroEscolhido.recomendacoes) {
                                             if (a.peso >= 7) {
-                                                System.out.println("-> " + a.destino.titulo + " (Afinidade: " + a.peso + "/10)");
+                                                System.out.println("-> " + a.destino.getTitulo() + " (Afinidade: " + a.peso + "/10)");
                                             }
                                         }
                                         System.out.println("");
                                     }
 
-                                    System.out.println("Confirma o empréstimo de '" + livroEscolhido.titulo + "'? (S/N): ");
+                                    System.out.println("Confirma o empréstimo de '" + livroEscolhido.getTitulo() + "'? (S/N): ");
                                     String confirmacao = leituraDadosUsuario.nextLine();
 
                                     if (confirmacao.equalsIgnoreCase("S")) {
-                                        livroEscolhido.disponivel = false; // deixa o livro com o status de indisponível
+                                        livroEscolhido.setDisponivel(false); // deixa o livro com o status de indisponível
                                         System.out.println("\n=== Empréstimo realizado com sucesso! ===\n");
                                     }
                                 } else {
                                     // se já não estiver disponível, entra na fila
-                                    System.out.println("\n*** Atenção: o livro " + livroEscolhido.titulo + " já está emprestado! ***\n");
+                                    System.out.println("\n*** Atenção: o livro " + livroEscolhido.getTitulo() + " já está emprestado! ***\n");
                                     System.out.println("Deseja entrar na fila de reserva de empréstimo? (S/N): ");
                                     String usuarioQuerReserva = leituraDadosUsuario.nextLine();
 
@@ -496,8 +518,8 @@ public class Main {
                                         String nome = leituraDadosUsuario.nextLine();
 
                                         // add na fila de empréstimos
-                                        minhaBiblioteca.filaEmprestimo.add(new Emprestimo(nome, livroEscolhido.titulo));
-                                        System.out.println("Você foi adicionado na fila de espera do livro " + "'" + livroEscolhido.titulo + "'.");
+                                        minhaBiblioteca.filaEmprestimo.add(new Emprestimo(nome, livroEscolhido.getTitulo()));
+                                        System.out.println("Você foi adicionado na fila de espera do livro " + "'" + livroEscolhido.getTitulo() + "'.");
                                     }
                                 }
                             } else {
@@ -557,19 +579,19 @@ public class Main {
 
                     if (livroEncontrado != null) {
                         // REGISTRA O LIVRO NO HISTÓRICO
-                        minhaBiblioteca.registrarNoHistorico(livroEncontrado.titulo);
+                        minhaBiblioteca.registrarNoHistorico(livroEncontrado.getTitulo());
 
                         // Se a distância for > 0, o sistema avisa qual livro foi achado
                         System.out.println("\n------------------------------------------------");
-                        System.out.println("Livro encontrado: " + livroEncontrado.titulo);
+                        System.out.println("Livro encontrado: " + livroEncontrado.getTitulo());
                         System.out.println("------------------------------------------------");
 
                         // Lógica de Recomendação do Grafo (a mesma do CASE 1)
                         if (!livroEncontrado.recomendacoes.isEmpty()) {
-                            System.out.println("DICA: Quem leu '" + livroEncontrado.titulo + "' também gostou de: \n");
+                            System.out.println("DICA: Quem leu '" + livroEncontrado.getTitulo() + "' também gostou de: \n");
                             for (Aresta a : livroEncontrado.recomendacoes) {
                                 if (a.peso >= 7) {
-                                    System.out.println(" -> " + a.destino.titulo + " (Afinidade: " + a.peso + "/10)");
+                                    System.out.println(" -> " + a.destino.getTitulo() + " (Afinidade: " + a.peso + "/10)");
                                 }
                             }
                         } else {
@@ -589,6 +611,7 @@ public class Main {
 
                     if (inputBusca.trim().isEmpty()) {
                         System.out.println("\nNada foi digitado. Cancelando pedido...");
+                        break;
                     }
 
                     // chamados a função BFS e guardamos o resultado
@@ -602,8 +625,8 @@ public class Main {
                     System.out.println("\nTotal de de livros visitados pela busca DFS: " + contagemDFS[0]);
 
                     if (resultadoBFS != null) {
-                        System.out.println("\nRESULTADO DA BUSCA: Livro encontrado! --- " + resultadoBFS.titulo +" ---");
-                        minhaBiblioteca.registrarNoHistorico(resultadoBFS.titulo);
+                        System.out.println("\nRESULTADO DA BUSCA: Livro encontrado! --- " + resultadoBFS.getTitulo() +" ---");
+                        minhaBiblioteca.registrarNoHistorico(resultadoBFS.getTitulo());
                     } else {
                         System.out.println("\n[AVISO] Nenhum livro semelhante à sua busca foi encontrado na árvore.");
                     }
@@ -619,26 +642,26 @@ public class Main {
                         Map<Livro, Integer> vizinhanca = Djikstra.calcularCaminhosVizinhanca(minhaBiblioteca, origemDjikstra);
 
                         System.out.println("\n=== Nível de proximidade POR VIZINHANÇA === ");
-                        System.out.println("\nPartindo de: " + origemDjikstra.titulo);
+                        System.out.println("\nPartindo de: " + origemDjikstra.getTitulo());
 
                         // registra a busca do livro no histórico
-                        minhaBiblioteca.registrarNoHistorico(origemDjikstra.titulo);
+                        minhaBiblioteca.registrarNoHistorico(origemDjikstra.getTitulo());
 
                         //Ordenar o resultado pela distância. Menor primeiro.
                         vizinhanca.entrySet().stream().filter(e -> e.getValue() > 0 && e.getValue() < Integer.MAX_VALUE).sorted(Map.Entry.comparingByValue()).forEach(e -> {
-                            System.out.println("- Livro: " + e.getKey().titulo + " | Grau de Distância: " + e.getValue() + (e.getValue() == 1 ? " salto" : " saltos"));
+                            System.out.println("- Livro: " + e.getKey().getTitulo() + " | Grau de Distância: " + e.getValue() + (e.getValue() == 1 ? " salto" : " saltos"));
                         });
 
                         // Cálculo pela afinidade
                         Map<Livro, Integer> afinidade = Djikstra.calcularCaminhosAfinidade(minhaBiblioteca, origemDjikstra);
 
                         System.out.println("\n=== Nível de proximidade por AFINIDADE ===");
-                        System.out.println("\nSe você gostou de " + origemDjikstra.titulo + ", veja outros títulos");
+                        System.out.println("\nSe você gostou de " + origemDjikstra.getTitulo() + ", veja outros títulos");
                         System.out.println("*** Obs.: Menor valor = recomendação mais forte");
 
                         afinidade.entrySet().stream().filter(e -> e.getValue() > 0 && e.getValue() < Integer.MAX_VALUE)
                                 .sorted(Map.Entry.comparingByValue())
-                                .forEach(e -> System.out.println("- Livro " + e.getKey().titulo + " | Valor da Afinidade: " + e.getValue()));
+                                .forEach(e -> System.out.println("- Livro " + e.getKey().getTitulo() + " | Valor da Afinidade: " + e.getValue()));
 
                     } else {
                         System.out.println("Livro não encontrado.");
